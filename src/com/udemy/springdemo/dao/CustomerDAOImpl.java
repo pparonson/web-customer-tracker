@@ -20,23 +20,59 @@ public class CustomerDAOImpl implements ICustomerDAO {
 	private SessionFactory sessionFactory;
 	
 	@Override
-	@Transactional
 	public List<Customer> getCustomers() {
 		
 		// get current Hibernate session
 		Session currentSession =  sessionFactory.getCurrentSession();
-		System.out.println("at currentSession obj");
 		
-		// create query
-		Query<Customer> query = currentSession.createQuery("from Customer", Customer.class);
-		System.out.println("at query obj");
+		// create query..  sort by last name
+		Query<Customer> query = 
+				currentSession.createQuery("from Customer order by lastName", 
+						Customer.class);
 		
 		// execute query and get result list
 		List<Customer> customers = query.getResultList();
-		System.out.println("at customers obj");	
 		
 		// return results
 		return customers;
 	}
+
+	@Override
+	public void saveCustomer(Customer customer) {
+		Session currentSession = sessionFactory.getCurrentSession();
+		
+		// create query to save customer
+//		currentSession.save(customer);
+		currentSession.saveOrUpdate(customer);
+		System.out.println("Saved.");
+	}
+
+	@Override
+	public Customer getCustomer(int customerId) {
+		Session currentSession = sessionFactory.getCurrentSession();
+		
+		// retrieve customer with appropriate customerId from DB
+		Customer customer = currentSession.get(Customer.class, customerId);
+		
+		return customer;
+	}
+
+	@Override
+	public void deleteCustomer(int customerId) {
+		Session currentSession = sessionFactory.getCurrentSession();
+		
+		// delete customer obj with appropriate customerId from Db
+		Query query = currentSession
+				.createQuery("delete from Customer c where c.id=:customerId");
+		query.setParameter("customerId", customerId);
+		System.out.println("Customer ID: " + customerId);
+		
+		// commit the transaction
+		query.executeUpdate();
+		
+	
+		
+	}
+	
 
 }
